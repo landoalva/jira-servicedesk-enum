@@ -119,14 +119,15 @@ func enumerateUsers(baseURL, cookie string, maxUsers int, deskID string, customQ
 				if seenAccountIDs[user.AccountID] {
 					continue
 				}
-				seenAccountIDs[user.AccountID] = true
-				newUsersThisBatch++
-				totalFetched++
 
-				if maxUsers > 0 && totalFetched > maxUsers {
+				if maxUsers > 0 && totalFetched >= maxUsers {
 					capped = true
 					break
 				}
+
+				seenAccountIDs[user.AccountID] = true
+				newUsersThisBatch++
+				totalFetched++
 
 				if targetingSingleDesk {
 					fmt.Printf("AccountID: %s\n", user.AccountID)
@@ -146,9 +147,11 @@ func enumerateUsers(baseURL, cookie string, maxUsers int, deskID string, customQ
 			}
 
 			if len(users) == 50 && newUsersThisBatch > 0 && customQuery == "" {
-				alphabet := "abcdefghijklmnopqrstuvwxyz0123456789"
-				for _, char := range alphabet {
-					queries = append(queries, query+string(char))
+				if maxUsers == 0 || totalFetched < maxUsers {
+					alphabet := "abcdefghijklmnopqrstuvwxyz0123456789"
+					for _, char := range alphabet {
+						queries = append(queries, query+string(char))
+					}
 				}
 			}
 
