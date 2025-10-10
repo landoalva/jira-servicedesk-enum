@@ -1,0 +1,97 @@
+package main
+
+import (
+	"flag"
+	"fmt"
+	"os"
+)
+
+func main() {
+	if len(os.Args) < 2 {
+		printUsage()
+		os.Exit(1)
+	}
+
+	command := os.Args[1]
+
+	switch command {
+	case "signup":
+		handleSignup()
+	case "permissions":
+		handlePermissions()
+	case "users":
+		handleUsers()
+	default:
+		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", command)
+		printUsage()
+		os.Exit(1)
+	}
+}
+
+func printUsage() {
+	fmt.Println("Usage: jira-servicedesk-enum <command> [options]")
+	fmt.Println("\nCommands:")
+	fmt.Println("  signup        Trigger servicedesk signup")
+	fmt.Println("  permissions   Check user permissions")
+	fmt.Println("  users         Enumerate users across service desks")
+	fmt.Println("\nRun 'jira-servicedesk-enum <command> -h' for command-specific help")
+}
+
+func handleSignup() {
+	fs := flag.NewFlagSet("signup", flag.ExitOnError)
+	url := fs.String("url", "", "Jira URL (e.g., https://example.atlassian.net)")
+	email := fs.String("email", "", "Email address for signup")
+
+	fs.Parse(os.Args[2:])
+
+	if *url == "" || *email == "" {
+		fmt.Fprintln(os.Stderr, "Error: --url and --email are required")
+		fs.Usage()
+		os.Exit(1)
+	}
+
+	if err := signup(*url, *email); err != nil {
+		fmt.Fprintf(os.Stderr, "Signup failed: %v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Println("Signup successful, check email")
+}
+
+func handlePermissions() {
+	fs := flag.NewFlagSet("permissions", flag.ExitOnError)
+	url := fs.String("url", "", "Jira URL (e.g., https://example.atlassian.net)")
+	cookie := fs.String("cookie", "", "Session cookie value (customer.account.session.token)")
+
+	fs.Parse(os.Args[2:])
+
+	if *url == "" || *cookie == "" {
+		fmt.Fprintln(os.Stderr, "Error: --url and --cookie are required")
+		fs.Usage()
+		os.Exit(1)
+	}
+
+	if err := checkPermissions(*url, *cookie); err != nil {
+		fmt.Fprintf(os.Stderr, "Permission check failed: %v\n", err)
+		os.Exit(1)
+	}
+}
+
+func handleUsers() {
+	fs := flag.NewFlagSet("users", flag.ExitOnError)
+	url := fs.String("url", "", "Jira URL (e.g., https://example.atlassian.net)")
+	cookie := fs.String("cookie", "", "Session cookie value (customer.account.session.token)")
+
+	fs.Parse(os.Args[2:])
+
+	if *url == "" || *cookie == "" {
+		fmt.Fprintln(os.Stderr, "Error: --url and --cookie are required")
+		fs.Usage()
+		os.Exit(1)
+	}
+
+	if err := enumerateUsers(*url, *cookie); err != nil {
+		fmt.Fprintf(os.Stderr, "User enumeration failed: %v\n", err)
+		os.Exit(1)
+	}
+}
