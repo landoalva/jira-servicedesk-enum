@@ -50,6 +50,33 @@ List all users across accessible service desks:
   --cookie "secret..."
 ```
 
+Target a specific service desk by ID:
+
+```bash
+./jira-servicedesk-enum users \
+  --url https://example.atlassian.net \
+  --cookie "secret..." \
+  --desk 123
+```
+
+Limit results per service desk:
+
+```bash
+./jira-servicedesk-enum users \
+  --url https://example.atlassian.net \
+  --cookie "secret..." \
+  --max 1000
+```
+
+Search with a custom query:
+
+```bash
+./jira-servicedesk-enum users \
+  --url https://example.atlassian.net \
+  --cookie "secret..." \
+  --query "john"
+```
+
 ## License
 
 Licensed under the Apache License, Version 2.0.
