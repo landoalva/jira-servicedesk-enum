@@ -37,7 +37,7 @@ func main() {
 	case "users":
 		handleUsers()
 	default:
-		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", command)
+		fmt.Fprintf(os.Stderr, "Error: unknown command: %s\n", command)
 		printUsage()
 		os.Exit(1)
 	}
@@ -66,7 +66,7 @@ func handleSignup() {
 	}
 
 	if err := signup(*url, *email); err != nil {
-		fmt.Fprintf(os.Stderr, "Signup failed: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error: signup failed: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -87,7 +87,7 @@ func handlePermissions() {
 	}
 
 	if err := checkPermissions(*url, *cookie); err != nil {
-		fmt.Fprintf(os.Stderr, "Permission check failed: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error: permission check failed: %v\n", err)
 		os.Exit(1)
 	}
 }
@@ -96,9 +96,11 @@ func handleUsers() {
 	fs := flag.NewFlagSet("users", flag.ExitOnError)
 	url := fs.String("url", "", "Jira URL (e.g., https://example.atlassian.net)")
 	cookie := fs.String("cookie", "", "Session cookie value (customer.account.session.token)")
-	maxUsers := fs.Int("max", 0, "Maximum users to fetch per service desk (0 = unlimited)")
+	maxUsers := fs.Int("max", 50, "Maximum users to fetch per service desk (0 = unlimited)")
 	deskID := fs.String("desk", "", "Specific service desk ID to enumerate (optional)")
 	query := fs.String("query", "", "Custom search query (optional, skips automatic enumeration)")
+	alphabet := fs.String("alphabet", "abcdefghijklmnopqrstuvwxyz0123456789", "Custom alphabet for search expansion")
+	output := fs.String("output", "", "Output CSV file path (optional)")
 
 	fs.Parse(os.Args[2:])
 
@@ -108,8 +110,14 @@ func handleUsers() {
 		os.Exit(1)
 	}
 
-	if err := enumerateUsers(*url, *cookie, *maxUsers, *deskID, *query); err != nil {
-		fmt.Fprintf(os.Stderr, "User enumeration failed: %v\n", err)
+	selfAccountID, err := extractAccountIDFromJWT(*cookie)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: could not extract account ID from cookie: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err := enumerateUsers(*url, *cookie, *maxUsers, *deskID, *query, *alphabet, selfAccountID, *output); err != nil {
+		fmt.Fprintf(os.Stderr, "Error: user enumeration failed: %v\n", err)
 		os.Exit(1)
 	}
 }

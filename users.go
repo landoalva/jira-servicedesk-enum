@@ -16,7 +16,9 @@
 package main
 
 import (
+	"encoding/csv"
 	"fmt"
+	"os"
 	"strings"
 )
 
@@ -39,7 +41,9 @@ type User struct {
 	Avatar       string `json:"avatar"`
 }
 
-func enumerateUsers(baseURL, cookie string, maxUsers int, deskID string, customQuery string) error {
+const defaultAvatar = "/default-avatar.png"
+
+func enumerateUsers(baseURL, cookie string, maxUsers int, deskID string, customQuery string, alphabet string, selfAccountID string, outputPath string) error {
 	client := newClient(baseURL, cookie)
 
 	var desks []ServiceDesk
@@ -80,10 +84,6 @@ func enumerateUsers(baseURL, cookie string, maxUsers int, deskID string, customQ
 			queries = []string{customQuery}
 		} else {
 			queries = []string{""}
-			alphabet := "abcdefghijklmnopqrstuvwxyz0123456789"
-			for _, char := range alphabet {
-				queries = append(queries, string(char))
-			}
 		}
 
 		for len(queries) > 0 {
@@ -104,19 +104,23 @@ func enumerateUsers(baseURL, cookie string, maxUsers int, deskID string, customQ
 
 			resp, err := client.get(url)
 			if err != nil {
-				fmt.Printf("  Error fetching users (query=%s): %v\n", query, err)
+				fmt.Fprintf(os.Stderr, "Error: fetching users (query=%s): %v\n", query, err)
 				continue
 			}
 
 			var users []User
 			if err := unmarshalJSON(resp, &users); err != nil {
-				fmt.Printf("  Error parsing users (query=%s): %v\n", query, err)
+				fmt.Fprintf(os.Stderr, "Error: parsing users (query=%s): %v\n", query, err)
 				continue
 			}
 
 			newUsersThisBatch := 0
 			for _, user := range users {
 				if seenAccountIDs[user.AccountID] {
+					continue
+				}
+
+				if user.AccountID == selfAccountID {
 					continue
 				}
 
@@ -129,26 +133,13 @@ func enumerateUsers(baseURL, cookie string, maxUsers int, deskID string, customQ
 				newUsersThisBatch++
 				totalFetched++
 
-				if targetingSingleDesk {
-					fmt.Printf("AccountID: %s\n", user.AccountID)
-					fmt.Printf("  Name: %s\n", user.DisplayName)
-					if user.EmailAddress != "" {
-						fmt.Printf("  Email: %s\n", user.EmailAddress)
-					}
-					if user.Avatar != "" && !strings.Contains(user.Avatar, "default-avatar.png") {
-						fmt.Printf("  Avatar: %s\n", user.Avatar)
-					}
-					fmt.Println()
-				} else {
-					if _, exists := userMap[user.AccountID]; !exists {
-						userMap[user.AccountID] = user
-					}
+				if _, exists := userMap[user.AccountID]; !exists {
+					userMap[user.AccountID] = user
 				}
 			}
 
 			if len(users) == 50 && newUsersThisBatch > 0 && customQuery == "" {
-				if maxUsers == 0 || totalFetched < maxUsers {
-					alphabet := "abcdefghijklmnopqrstuvwxyz0123456789"
+				if (maxUsers == 0 || maxUsers > 50) && totalFetched < maxUsers {
 					for _, char := range alphabet {
 						queries = append(queries, query+string(char))
 					}
@@ -167,21 +158,59 @@ func enumerateUsers(baseURL, cookie string, maxUsers int, deskID string, customQ
 		}
 	}
 
-	if !targetingSingleDesk {
-		fmt.Printf("\n\nUnique Users (%d):\n", len(userMap))
+	if len(userMap) == 0 {
+		fmt.Println("\nNo users found")
+		return nil
+	}
 
-		for _, user := range userMap {
-			fmt.Printf("AccountID: %s\n", user.AccountID)
-			fmt.Printf("  Name: %s\n", user.DisplayName)
-			if user.EmailAddress != "" {
-				fmt.Printf("  Email: %s\n", user.EmailAddress)
-			}
-			if user.Avatar != "" && !strings.Contains(user.Avatar, "/default-avatar.png") {
-				fmt.Printf("  Avatar: %s\n", user.Avatar)
-			}
-			fmt.Println()
+	if outputPath != "" {
+		return writeUsersToCSV(userMap, outputPath)
+	}
+
+	printUsers(userMap)
+	return nil
+}
+
+func writeUsersToCSV(userMap map[string]User, outputPath string) error {
+	file, err := os.Create(outputPath)
+	if err != nil {
+		return fmt.Errorf("create CSV file: %w", err)
+	}
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	if err := writer.Write([]string{"AccountID", "DisplayName", "Email", "Avatar"}); err != nil {
+		return fmt.Errorf("write CSV header: %w", err)
+	}
+
+	for _, user := range userMap {
+		avatar := user.Avatar
+		if strings.Contains(avatar, defaultAvatar) {
+			avatar = ""
+		}
+		if err := writer.Write([]string{user.AccountID, user.DisplayName, user.EmailAddress, avatar}); err != nil {
+			return fmt.Errorf("write CSV row: %w", err)
 		}
 	}
 
+	fmt.Printf("\nWrote %d users to %s\n", len(userMap), outputPath)
 	return nil
+}
+
+func printUsers(userMap map[string]User) {
+	fmt.Printf("\n\nUnique Users (%d):\n", len(userMap))
+
+	for _, user := range userMap {
+		fmt.Printf("AccountID: %s\n", user.AccountID)
+		fmt.Printf("  Name: %s\n", user.DisplayName)
+		if user.EmailAddress != "" {
+			fmt.Printf("  Email: %s\n", user.EmailAddress)
+		}
+		if user.Avatar != "" && !strings.Contains(user.Avatar, defaultAvatar) {
+			fmt.Printf("  Avatar: %s\n", user.Avatar)
+		}
+		fmt.Println()
+	}
 }
